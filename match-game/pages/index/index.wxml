@@ -1,0 +1,40 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <view class="title-section">
+    <text class="game-title">下落消消乐</text>
+    <text class="game-subtitle">经典三消，挑战你的极限</text>
+  </view>
+
+  <view class="level-section">
+    <text class="section-title">选择关卡</text>
+    <view class="level-grid">
+      <view 
+        class="level-card {{item.unlocked ? '' : 'locked'}} {{currentLevel === item.level ? 'selected' : ''}}"
+        wx:for="{{levels}}" 
+        wx:key="level"
+        bindtap="selectLevel"
+        data-level="{{item.level}}"
+        data-unlocked="{{item.unlocked}}"
+      >
+        <text class="level-number">{{item.level}}</text>
+        <text class="level-status">{{item.unlocked ? (item.completed ? '✓' : '进行中') : '🔒'}}</text>
+        <text class="level-target">目标: {{item.target}}分</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="button-section">
+    <button class="start-btn" bindtap="startGame">
+      <text class="btn-text">开始游戏</text>
+      <text class="btn-icon">▶</text>
+    </button>
+  </view>
+
+  <view class="tips-section">
+    <text class="tips-title">游戏说明</text>
+    <text class="tips-content">• 点击两个及以上相邻的相同元素即可消除</text>
+    <text class="tips-content">• 消除后上方元素会下落填充</text>
+    <text class="tips-content">• 连续消除可获得额外分数</text>
+    <text class="tips-content">• 达到目标分数即可过关</text>
+  </view>
+</view>

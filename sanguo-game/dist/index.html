@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#8B4513">
+  <title>三国霸业</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow: hidden;
+    }
+    
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 100%;
+    }
+    
+    .top-bar {
+      background: linear-gradient(180deg, #2d1b0e 0%, #3d2815 100%);
+      padding: 10px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #8B4513;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .turn-info {
+      font-size: 14px;
+      color: #ffa500;
+    }
+    
+    .resources {
+      display: flex;
+      gap: 15px;
+      font-size: 13px;
+    }
+    
+    .resource {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .resource-icon {
+      font-size: 16px;
+    }
+    
+    .map-container {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background: #2d5016;
+    }
+    
+    #gameCanvas {
+      display: block;
+      cursor: pointer;
+    }
+    
+    .bottom-panel {
+      background: linear-gradient(0deg, #2d1b0e 0%, #3d2815 100%);
+      padding: 10px 15px;
+      border-top: 3px solid #8B4513;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+    
+    .btn:active {
+      transform: scale(0.95);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+      color: #2d1b0e;
+    }
+    
+    .btn-attack {
+      background: linear-gradient(180deg, #ff4444 0%, #cc0000 100%);
+      color: #fff;
+    }
+    
+    .btn-build {
+      background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+      color: #fff;
+    }
+    
+    .btn-move {
+      background: linear-gradient(180deg, #2196F3 0%, #1565C0 100%);
+      color: #fff;
+    }
+    
+    .btn-endturn {
+      background: linear-gradient(180deg, #9C27B0 0%, #6A1B9A 100%);
+      color: #fff;
+    }
+    
+    .info-panel {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .info-title {
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 5px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: linear-gradient(180deg, #3d2815 0%, #2d1b0e 100%);
+      padding: 30px;
+      border-radius: 15px;
+      border: 3px solid #8B4513;
+      text-align: center;
+      max-width: 90%;
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      color: #ffd700;
+      margin-bottom: 20px;
+    }
+    
+    .modal-btn {
+      margin: 10px;
+      padding: 15px 30px;
+    }
+    
+    .selection-info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 10;
+    }
+    
+    .minimap {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 120px;
+      height: 120px;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #8B4513;
+      border-radius: 8px;
+      z-index: 10;
+    }
+    
+    .log-panel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 200px;
+      max-height: 150px;
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #8B4513;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    .log-entry {
+      margin-bottom: 5px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .player-color {
+      color: #4CAF50;
+    }
+    
+    .enemy-color {
+      color: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="top-bar">
+      <div>
+        <div class="title">⚔️ 三国霸业 ⚔️</div>
+        <div class="turn-info">回合: <span id="turnNumber">1</span> | 阶段: <span id="phase">回合开始</span></div>
+      </div>
+      <div class="resources">
+        <div class="resource"><span class="resource-icon">👑</span><span id="gold">100</span></div>
+        <div class="resource"><span class="resource-icon">🌾</span><span id="food">100</span></div>
+        <div class="resource"><span class="resource-icon">⚔️</span><span id="troops">50</span></div>
+      </div>
+    </div>
+    
+    <div class="map-container">
+      <canvas id="gameCanvas"></canvas>
+      <canvas id="minimapCanvas" class="minimap"></canvas>
+      <div class="log-panel">
+        <div class="info-title">📜 战报</div>
+        <div id="battleLog"></div>
+      </div>
+      <div class="selection-info" id="selectionInfo">
+        点击地块查看详情
+      </div>
+    </div>
+    
+    <div class="bottom-panel">
+      <div class="action-buttons">
+        <button class="btn btn-move" onclick="game.selectMove()">🏃 移动</button>
+        <button class="btn btn-attack" onclick="game.selectAttack()">⚔️ 进攻</button>
+        <button class="btn btn-build" onclick="game.buildCity()" id="buildBtn" disabled>🏰 建设</button>
+        <button class="btn btn-primary" onclick="game.recruitTroops()" id="recruitBtn" disabled>🛡️ 征兵</button>
+        <button class="btn btn-endturn" onclick="game.endTurn()">⏭️ 结束回合</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal" id="startModal">
+    <div class="modal-content">
+      <div class="modal-title">🏯 三国霸业 🏯</div>
+      <p style="margin-bottom: 20px; color: #ccc;">
+        统一天下，从这里开始！<br>
+        占领城池，招募兵马，击败敌军！
+      </p>
+      <button class="btn btn-primary modal-btn" onclick="game.startGame()">🎮 开始游戏</button>
+    </div>
+  </div>
+  
+  <div class="modal" id="endModal">
+    <div class="modal-content">
+      <div class="modal-title" id="endTitle">游戏结束</div>
+      <p id="endMessage" style="margin-bottom: 20px; color: #ccc;"></p>
+      <button class="btn btn-primary modal-btn" onclick="game.restartGame()">🔄 重新开始</button>
+    </div>
+  </div>
+
+  <script>
+    // Game Constants
+    const TILE_SIZE = 60;
+    const MAP_WIDTH = 12;
+    const MAP_HEIGHT = 10;
+    
+    // Terrain Types
+    const TERRAIN = {
+      GRASS: { id: 0, name: '草原', color: '#4a7c23', moveCost: 1, food: 1 },
+      FOREST: { id: 1, name: '森林', color: '#2d5016', moveCost: 2, food: 0 },
+      MOUNTAIN: { id: 2, name: '山地', color: '#8B7355', moveCost: 3, food: 0, defense: 2 },
+      WATER: { id: 3, name: '水域', color: '#1e90ff', moveCost: 99, food: 0 },
+      CITY: { id: 4, name: '城池', color: '#8B4513', moveCost: 1, defense: 2, gold: 5 }
+    };
+    
+    // Unit Types
+    const UNIT_TYPES = {
+      SOLDIER: { name: '步兵', attack: 10, defense: 5, speed: 1, cost: 20 },
+      CAVALRY: { name: '骑兵', attack: 15, defense: 3, speed: 2, cost: 40 },
+      ARCHER: { name: '弓兵', attack: 12, defense: 4, speed: 1, cost: 30 }
+    };
+    
+    class Game {
+      constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.minimapCanvas = document.getElementById('minimapCanvas');
+        this.minimapCtx = this.minimapCanvas.getContext('2d');
+        
+        this.resizeCanvas();
+        
+        this.map = [];
+        this.units = [];
+        this.cities = [];
+        this.playerCities = [];
+        this.enemyCities = [];
+        
+        this.turn = 1;
+        this.phase = '回合开始';
+        this.resources = { gold: 100, food: 100, troops: 50 };
+        
+        this.selectedTile = null;
+        this.selectedUnit = null;
+        this.actionMode = null; // 'move', 'attack', 'build'
+        this.validMoves = [];
+        this.validAttacks = [];
+        
+        this.battleLog = [];
+        this.gameOver = false;
+        
+        this.setupEventListeners();
+        this.showStartModal();
+        
+        window.addEventListener('resize', () => this.resizeCanvas());
+      }
+      
+      resizeCanvas() {
+        const container = this.canvas.parentElement;
+        this.canvas.width = MAP_WIDTH * TILE_SIZE;
+        this.canvas.height = MAP_HEIGHT * TILE_SIZE;
+        this.minimapCanvas.width = 120;
+        this.minimapCanvas.height = 90;
+      }
+      
+      showStartModal() {
+        document.getElementById('startModal').classList.add('active');
+      }
+      
+      startGame() {
+        document.getElementById('startModal').classList.remove('active');
+        this.initMap();
+        this.initCities();
+        this.initUnits();
+        this.updateUI();
+        this.render();
+      }
+      
+      initMap() {
+        this.map = [];
+        for (let y = 0; y < MAP_HEIGHT; y++) {
+          const row = [];
+          for (let x = 0; x < MAP_WIDTH; x++) {
+            let terrain = TERRAIN.GRASS;
+            const rand = Math.random();
+            
+            if (rand < 0.15) terrain = TERRAIN.FOREST;
+            else if (rand < 0.25) terrain = TERRAIN.MOUNTAIN;
+            else if (rand < 0.30) terrain = TERRAIN.WATER;
+            
+            row.push({
+              x, y,
+              terrain,
+              owner: null,
+              city: null
+            });
+          }
+          this.map.push(row);
+        }
+      }
+      
+      initCities() {
+        // Player cities (bottom area - green)
+        const playerCity1 = { x: 2, y: 8, owner: 'player', name: '玩家主城', level: 1, defense: 10, production: 10 };
+        const playerCity2 = { x: 4, y: 9, owner: 'player', name: '前哨', level: 1, defense: 5, production: 5 };
+        this.playerCities = [playerCity1, playerCity2];
+        
+        // Enemy cities (top area - red)
+        const enemyCity1 = { x: 9, y: 1, owner: 'enemy', name: '敌军主城', level: 1, defense: 10, production: 10 };
+        const enemyCity2 = { x: 7, y: 0, owner: 'enemy', name: '敌军要塞', level: 1, defense: 5, production: 5 };
+        this.enemyCities = [enemyCity1, enemyCity2];
+        
+        this.cities = [...this.playerCities, ...this.enemyCities];
+        
+        // Mark city tiles
+        this.cities.forEach(city => {
+          this.map[city.y][city.x].terrain = TERRAIN.CITY;
+          this.map[city.y][city.x].city = city;
+          this.map[city.y][city.x].owner = city.owner;
+        });
+      }
+      
+      initUnits() {
+        // Player starting units
+        this.units.push({
+          id: 1,
+          x: 3, y: 8,
+          owner: 'player',
+          type: 'SOLDIER',
+          hp: 100,
+          maxHp: 100,
+          moved: false,
+          attacked: false
+        });
+        
+        this.units.push({
+          id: 2,
+          x: 3, y: 9,
+          owner: 'player',
+          type: 'SOLDIER',
+          hp: 100,
+          maxHp: 100,
+          moved: false,
+          attacked: false
+        });
+        
+        // Enemy starting units
+        this.units.push({
+          id: 3,
+          x: 8, y: 1,
+          owner: 'enemy',
+          type: 'SOLDIER',
+          hp: 100,
+          maxHp: 100,
+          moved: false,
+          attacked: false
+        });
+        
+        this.units.push({
+          id: 4,
+          x: 8, y: 2,
+          owner: 'enemy',
+          type: 'SOLDIER',
+          hp: 100,
+          maxHp: 100,
+          moved: false,
+          attacked: false
+        });
+      }
+      
+      setupEventListeners() {
+        this.canvas.addEventListener('click', (e) => this.handleClick(e));
+        this.canvas.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          const rect = this.canvas.getBoundingClientRect();
+          const x = Math.floor((touch.clientX - rect.left) / TILE_SIZE);
+          const y = Math.floor((touch.clientY - rect.top) / TILE_SIZE);
+          this.handleTileClick(x, y);
+        });
+      }
+      
+      handleClick(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+        const y = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+        this.handleTileClick(x, y);
+      }
+      
+      handleTileClick(x, y) {
+        if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return;
+        
+        const tile = this.map[y][x];
+        const unit = this.getUnitAt(x, y);
+        
+        if (this.actionMode === 'move' && this.selectedUnit) {
+          if (this.isValidMove(x, y)) {
+            this.moveUnit(this.selectedUnit, x, y);
+          }
+          this.cancelAction();
+          return;
+        }
+        
+        if (this.actionMode === 'attack' && this.selectedUnit) {
+          if (this.isValidAttack(x, y)) {
+            this.attack(this.selectedUnit, unit);
+          }
+          this.cancelAction();
+          return;
+        }
+        
+        // Select tile/unit
+        this.selectedTile = tile;
+        this.selectedUnit = unit;
+        this.updateSelectionInfo(tile, unit);
+        this.updateActionButtons(tile, unit);
+        this.render();
+      }
+      
+      getUnitAt(x, y) {
+        return this.units.find(u => u.x === x && u.y === y && u.hp > 0);
+      }
+      
+      updateSelectionInfo(tile, unit) {
+        const info = document.getElementById('selectionInfo');
+        let html = `<strong>位置:</strong> (${tile.x}, ${tile.y})<br>`;
+        html += `<strong>地形:</strong> ${tile.terrain.name}`;
+        
+        if (tile.city) {
+          html += `<br><strong>城池:</strong> ${tile.city.name}`;
+          html += `<br><strong>守军:</strong> ${tile.city.defense}`;
+        }
+        
+        if (unit) {
+          const type = UNIT_TYPES[unit.type];
+          html += `<br><br><strong>单位:</strong> ${type.name}`;
+          html += `<br><strong>生命:</strong> ${unit.hp}/${unit.maxHp}`;
+          html += `<br><strong>攻击:</strong> ${type.attack} <strong>防御:</strong> ${type.defense}`;
+        }
+        
+        info.innerHTML = html;
+      }
+      
+      updateActionButtons(tile, unit) {
+        const buildBtn = document.getElementById('buildBtn');
+        const recruitBtn = document.getElementById('recruitBtn');
+        
+        // Build button - only on player city
+        buildBtn.disabled = !(tile.city && tile.city.owner === 'player' && tile.terrain === TERRAIN.GRASS);
+        
+        // Recruit button - only on player city
+        recruitBtn.disabled = !(tile.city && tile.city.owner === 'player');
+      }
+      
+      selectMove() {
+        if (!this.selectedUnit || this.selectedUnit.owner !== 'player') {
+          this.addLog('请先选择一个己方单位');
+          return;
+        }
+        
+        if (this.selectedUnit.moved) {
+          this.addLog('该单位本回合已移动');
+          return;
+        }
+        
+        this.actionMode = 'move';
+        this.calculateValidMoves(this.selectedUnit);
+        this.render();
+      }
+      
+      selectAttack() {
+        if (!this.selectedUnit || this.selectedUnit.owner !== 'player') {
+          this.addLog('请先选择一个己方单位');
+          return;
+        }
+        
+        if (this.selectedUnit.attacked) {
+          this.addLog('该单位本回合已进攻');
+          return;
+        }
+        
+        this.actionMode = 'attack';
+        this.calculateValidAttacks(this.selectedUnit);
+        this.render();
+      }
+      
+      calculateValidMoves(unit) {
+        this.validMoves = [];
+        const type = UNIT_TYPES[unit.type];
+        const range = type.speed;
+        
+        for (let dy = -range; dy <= range; dy++) {
+          for (let dx = -range; dx <= range; dx++) {
+            const nx = unit.x + dx;
+            const ny = unit.y + dy;
+            
+            if (this.isValidMove(nx, ny)) {
+              this.validMoves.push({ x: nx, y: ny });
+            }
+          }
+        }
+      }
+      
+      isValidMove(x, y) {
+        if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return false;
+        
+        const tile = this.map[y][x];
+        const unit = this.getUnitAt(x, y);
+        const myUnit = this.selectedUnit;
+        
+        if (unit) return false;
+        if (tile.terrain.moveCost >= 99) return false;
+        
+        const dist = Math.abs(x - myUnit.x) + Math.abs(y - myUnit.y);
+        const range = UNIT_TYPES[myUnit.type].speed;
+        
+        if (dist > range) return false;
+        
+        return true;
+      }
+      
+      calculateValidAttacks(unit) {
+        this.validAttacks = [];
+        
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            
+            const nx = unit.x + dx;
+            const ny = unit.y + dy;
+            
+            if (this.isValidAttack(nx, ny)) {
+              this.validAttacks.push({ x: nx, y: ny });
+            }
+          }
+        }
+      }
+      
+      isValidAttack(x, y) {
+        if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return false;
+        
+        const target = this.getUnitAt(x, y);
+        if (!target || target.owner === this.selectedUnit.owner) return false;
+        
+        return true;
+      }
+      
+      moveUnit(unit, x, y) {
+        const oldX = unit.x, oldY = unit.y;
+        unit.x = x;
+        unit.y = y;
+        unit.moved = true;
+        
+        this.addLog(`<span class="player-color">我军</span> ${UNIT_TYPES[unit.type].name} 移动到 (${x}, ${y})`);
+        
+        // Check if moving to enemy city
+        const tile = this.map[y][x];
+        if (tile.city && tile.city.owner === 'enemy') {
+          this.addLog(`攻占城池: ${tile.city.name}!`);
+          tile.city.owner = 'player';
+          tile.owner = 'player';
+          this.updateCityOwnership(tile.city);
+        }
+      }
+      
+      attack(attacker, defender) {
+        const attackType = UNIT_TYPES[attacker.type];
+        const defenseType = UNIT_TYPES[defender.type];
+        
+        const attackPower = attackType.attack * (attacker.hp / attacker.maxHp);
+        const defensePower = defenseType.defense * (defender.hp / defender.maxHp);
+        
+        // Check terrain bonus
+        const defenderTile = this.map[defender.y][defender.x];
+        let terrainBonus = 1;
+        if (defenderTile.terrain.defense) terrainBonus += defenderTile.terrain.defense * 0.2;
+        if (defenderTile.city) terrainBonus += 0.5;
+        
+        const damage = Math.max(1, attackPower - defensePower * terrainBonus);
+        defender.hp = Math.max(0, defender.hp - damage);
+        
+        attacker.attacked = true;
+        
+        const attackerLabel = attacker.owner === 'player' ? '我军' : '敌军';
+        const defenderLabel = defender.owner === 'player' ? '我军' : '敌军';
+        
+        this.addLog(`<span class="${attacker.owner === 'player' ? 'player-color' : 'enemy-color'}">${attackerLabel}</span> 攻击 <span class="${defender.owner === 'player' ? 'player-color' : 'enemy-color'}">${defenderLabel}</span> ${UNIT_TYPES[defender.type].name}，造成 ${Math.round(damage)} 伤害`);
+        
+        if (defender.hp <= 0) {
+          this.units = this.units.filter(u => u.id !== defender.id);
+          this.addLog(`<span class="${defender.owner === 'player' ? 'player-color' : 'enemy-color'}">${defenderLabel}</span> ${UNIT_TYPES[defender.type].name} 被消灭!`);
+        }
+        
+        this.checkWinCondition();
+        this.render();
+      }
+      
+      buildCity() {
+        if (!this.selectedTile || !this.selectedTile.city) return;
+        if (this.selectedTile.city.owner !== 'player') return;
+        if (this.resources.gold < 50) {
+          this.addLog('金币不足，无法建设!');
+          return;
+        }
+        
+        this.resources.gold -= 50;
+        this.selectedTile.city.level++;
+        this.selectedTile.city.defense += 5;
+        this.selectedTile.city.production += 3;
+        
+        this.addLog(`升级城池: ${this.selectedTile.city.name} (等级 ${this.selectedTile.city.level})`);
+        this.updateUI();
+        this.render();
+      }
+      
+      recruitTroops() {
+        if (!this.selectedTile || !this.selectedTile.city) return;
+        if (this.selectedTile.city.owner !== 'player') return;
+        
+        const cost = 30;
+        if (this.resources.gold < cost) {
+          this.addLog('金币不足，无法征兵!');
+          return;
+        }
+        
+        // Find adjacent empty tile
+        const adjacents = [
+          { x: this.selectedTile.x - 1, y: this.selectedTile.y },
+          { x: this.selectedTile.x + 1, y: this.selectedTile.y },
+          { x: this.selectedTile.x, y: this.selectedTile.y - 1 },
+          { x: this.selectedTile.x, y: this.selectedTile.y + 1 }
+        ];
+        
+        for (const pos of adjacents) {
+          if (pos.x < 0 || pos.x >= MAP_WIDTH || pos.y < 0 || pos.y >= MAP_HEIGHT) continue;
+          if (this.getUnitAt(pos.x, pos.y)) continue;
+          if (this.map[pos.y][pos.x].terrain.moveCost >= 99) continue;
+          
+          this.resources.gold -= cost;
+          this.units.push({
+            id: Date.now(),
+            x: pos.x,
+            y: pos.y,
+            owner: 'player',
+            type: 'SOLDIER',
+            hp: 100,
+            maxHp: 100,
+            moved: false,
+            attacked: false
+          });
+          
+          this.addLog('招募新兵加入战场!');
+          this.updateUI();
+          this.render();
+          return;
+        }
+        
+        this.addLog('周围没有空位放置单位!');
+      }
+      
+      cancelAction() {
+        this.actionMode = null;
+        this.validMoves = [];
+        this.validAttacks = [];
+        this.render();
+      }
+      
+      endTurn() {
+        this.phase = '敌军回合';
+        this.render();
+        
+        setTimeout(() => {
+          this.enemyTurn();
+        }, 500);
+      }
+      
+      enemyTurn() {
+        this.units.forEach(unit => {
+          if (unit.owner === 'enemy') {
+            unit.moved = false;
+            unit.attacked = false;
+          }
+        });
+        
+        // Simple AI
+        this.enemyCities.forEach(city => {
+          // Recruit troops if possible
+          if (Math.random() > 0.5) {
+            const adjacents = [
+              { x: city.x - 1, y: city.y },
+              { x: city.x + 1, y: city.y },
+              { x: city.x, y: city.y - 1 },
+              { x: city.x, y: city.y + 1 }
+            ];
+            
+            for (const pos of adjacents) {
+              if (pos.x < 0 || pos.x >= MAP_WIDTH || pos.y < 0 || pos.y >= MAP_HEIGHT) continue;
+              if (this.getUnitAt(pos.x, pos.y)) continue;
+              if (this.map[pos.y][pos.x].terrain.moveCost >= 99) continue;
+              
+              this.units.push({
+                id: Date.now() + Math.random(),
+                x: pos.x,
+                y: pos.y,
+                owner: 'enemy',
+                type: 'SOLDIER',
+                hp: 100,
+                maxHp: 100,
+                moved: false,
+                attacked: false
+              });
+              
+              this.addLog('<span class="enemy-color">敌军</span> 增援到达!');
+              break;
+            }
+          }
+        });
+        
+        // Move enemy units towards player cities
+        this.units.filter(u => u.owner === 'enemy' && !u.moved).forEach(unit => {
+          let bestTarget = null;
+          let bestDist = Infinity;
+          
+          // Find nearest player unit or city
+          this.playerCities.forEach(city => {
+            const dist = Math.abs(city.x - unit.x) + Math.abs(city.y - unit.y);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestTarget = city;
+            }
+          });
+          
+          this.units.filter(u => u.owner === 'player').forEach(unit => {
+            const dist = Math.abs(unit.x - unit.x) + Math.abs(unit.y - unit.y);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestTarget = unit;
+            }
+          });
+          
+          if (bestTarget) {
+            const dx = Math.sign(bestTarget.x - unit.x);
+            const dy = Math.sign(bestTarget.y - unit.y);
+            
+            const moves = [{ x: unit.x + dx, y: unit.y }, { x: unit.x, y: unit.y + dy }];
+            
+            for (const move of moves) {
+              if (move.x >= 0 && move.x < MAP_WIDTH && move.y >= 0 && move.y < MAP_HEIGHT) {
+                const tile = this.map[move.y][move.x];
+                if (tile.terrain.moveCost < 99 && !this.getUnitAt(move.x, move.y)) {
+                  unit.x = move.x;
+                  unit.y = move.y;
+                  unit.moved = true;
+                  
+                  // Check if captured city
+                  if (tile.city && tile.city.owner === 'player') {
+                    tile.city.owner = 'enemy';
+                    tile.owner = 'enemy';
+                    this.updateCityOwnership(tile.city);
+                    this.addLog(`<span class="enemy-color">敌军</span> 攻占了 ${tile.city.name}!`);
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        });
+        
+        // Enemy attacks
+        this.units.filter(u => u.owner === 'enemy' && !u.attacked).forEach(enemy => {
+          const adjacents = [
+            { x: enemy.x - 1, y: enemy.y },
+            { x: enemy.x + 1, y: enemy.y },
+            { x: enemy.x, y: enemy.y - 1 },
+            { x: enemy.x, y: enemy.y + 1 }
+          ];
+          
+          for (const pos of adjacents) {
+            const target = this.getUnitAt(pos.x, pos.y);
+            if (target && target.owner === 'player') {
+              this.attack(enemy, target);
+              break;
+            }
+          }
+        });
+        
+        // Enemy production
+        this.enemyCities.forEach(city => {
+          this.resources.gold += city.production;
+        });
+        
+        this.nextTurn();
+      }
+      
+      updateCityOwnership(city) {
+        if (city.owner === 'player') {
+          if (!this.playerCities.includes(city)) {
+            this.playerCities.push(city);
+            this.enemyCities = this.enemyCities.filter(c => c !== city);
+          }
+        } else {
+          if (!this.enemyCities.includes(city)) {
+            this.enemyCities.push(city);
+            this.playerCities = this.playerCities.filter(c => c !== city);
+          }
+        }
+      }
+      
+      nextTurn() {
+        this.turn++;
+        this.phase = '回合开始';
+        
+        // Reset player units
+        this.units.filter(u => u.owner === 'player').forEach(unit => {
+          unit.moved = false;
+          unit.attacked = false;
+        });
+        
+        // Player production
+        this.playerCities.forEach(city => {
+          this.resources.gold += city.production;
+          this.resources.food += Math.floor(city.production / 2);
+        });
+        
+        // Consume food
+        const consumption = this.units.filter(u => u.owner === 'player').length * 2;
+        this.resources.food = Math.max(0, this.resources.food - consumption);
+        
+        // Troops decay if no food
+        if (this.resources.food === 0) {
+          this.units.filter(u => u.owner === 'player' && Math.random() > 0.5).forEach(unit => {
+            unit.hp -= 20;
+          });
+          this.addLog('粮食耗尽，部队士气下降!');
+        }
+        
+        this.units = this.units.filter(u => u.hp > 0);
+        
+        this.checkWinCondition();
+        this.updateUI();
+        this.render();
+      }
+      
+      checkWinCondition() {
+        if (this.enemyCities.length === 0) {
+          this.gameOver = true;
+          document.getElementById('endTitle').textContent = '🎉 胜利! 🎉';
+          document.getElementById('endMessage').textContent = '恭喜! 你已统一天下!';
+          document.getElementById('endModal').classList.add('active');
+        } else if (this.playerCities.length === 0) {
+          this.gameOver = true;
+          document.getElementById('endTitle').textContent = '💀 失败 💀';
+          document.getElementById('endMessage').textContent = '城池尽失，大业未成...';
+          document.getElementById('endModal').classList.add('active');
+        }
+      }
+      
+      restartGame() {
+        document.getElementById('endModal').classList.remove('active');
+        this.turn = 1;
+        this.resources = { gold: 100, food: 100, troops: 50 };
+        this.units = [];
+        this.cities = [];
+        this.playerCities = [];
+        this.enemyCities = [];
+        this.battleLog = [];
+        this.gameOver = false;
+        this.selectedTile = null;
+        this.selectedUnit = null;
+        this.actionMode = null;
+        this.validMoves = [];
+        this.validAttacks = [];
+        
+        this.initMap();
+        this.initCities();
+        this.initUnits();
+        this.updateUI();
+        this.render();
+      }
+      
+      addLog(message) {
+        this.battleLog.unshift(message);
+        if (this.battleLog.length > 20) this.battleLog.pop();
+        
+        const logDiv = document.getElementById('battleLog');
+        logDiv.innerHTML = this.battleLog.map(m => `<div class="log-entry">${m}</div>`).join('');
+      }
+      
+      updateUI() {
+        document.getElementById('turnNumber').textContent = this.turn;
+        document.getElementById('phase').textContent = this.phase;
+        document.getElementById('gold').textContent = this.resources.gold;
+        document.getElementById('food').textContent = this.resources.food;
+        document.getElementById('troops').textContent = this.units.filter(u => u.owner === 'player').length;
+      }
+      
+      render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw map
+        for (let y = 0; y < MAP_HEIGHT; y++) {
+          for (let x = 0; x < MAP_WIDTH; x++) {
+            const tile = this.map[y][x];
+            this.drawTile(tile);
+          }
+        }
+        
+        // Draw valid moves/attacks
+        if (this.actionMode === 'move') {
+          this.validMoves.forEach(pos => {
+            this.ctx.fillStyle = 'rgba(76, 175, 80, 0.5)';
+            this.ctx.fillRect(pos.x * TILE_SIZE, pos.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          });
+        } else if (this.actionMode === 'attack') {
+          this.validAttacks.forEach(pos => {
+            this.ctx.fillStyle = 'rgba(244, 67, 54, 0.5)';
+            this.ctx.fillRect(pos.x * TILE_SIZE, pos.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          });
+        }
+        
+        // Draw units
+        this.units.forEach(unit => {
+          this.drawUnit(unit);
+        });
+        
+        // Draw selection highlight
+        if (this.selectedTile) {
+          this.ctx.strokeStyle = '#ffd700';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeRect(
+            this.selectedTile.x * TILE_SIZE,
+            this.selectedTile.y * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+          );
+        }
+        
+        // Draw minimap
+        this.renderMinimap();
+      }
+      
+      drawTile(tile) {
+        const x = tile.x * TILE_SIZE;
+        const y = tile.y * TILE_SIZE;
+        
+        // Base terrain
+        this.ctx.fillStyle = tile.terrain.color;
+        this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+        
+        // Terrain details
+        if (tile.terrain === TERRAIN.FOREST) {
+          this.ctx.fillStyle = '#1a4d0e';
+          this.ctx.font = '30px Arial';
+          this.ctx.fillText('🌲', x + 15, y + 40);
+        } else if (tile.terrain === TERRAIN.MOUNTAIN) {
+          this.ctx.font = '30px Arial';
+          this.ctx.fillText('⛰️', x + 15, y + 40);
+        } else if (tile.terrain === TERRAIN.WATER) {
+          this.ctx.font = '30px Arial';
+          this.ctx.fillText('🌊', x + 15, y + 40);
+        } else if (tile.terrain === TERRAIN.CITY) {
+          this.ctx.fillStyle = tile.owner === 'player' ? '#4CAF50' : '#f44336';
+          this.ctx.font = '28px Arial';
+          this.ctx.fillText('🏰', x + 15, y + 40);
+          
+          // City level indicator
+          if (tile.city) {
+            this.ctx.fillStyle = '#ffd700';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.fillText(`Lv.${tile.city.level}`, x + 20, y + 15);
+          }
+        }
+        
+        // Grid lines
+        this.ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+      }
+      
+      drawUnit(unit) {
+        const x = unit.x * TILE_SIZE + TILE_SIZE / 2;
+        const y = unit.y * TILE_SIZE + TILE_SIZE / 2;
+        const type = UNIT_TYPES[unit.type];
+        
+        // Unit background
+        this.ctx.fillStyle = unit.owner === 'player' ? '#4CAF50' : '#f44336';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 20, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Unit icon
+        this.ctx.font = '20px Arial';
+        this.ctx.fillText('⚔️', x - 10, y + 7);
+        
+        // HP bar
+        const hpWidth = 36;
+        const hpHeight = 5;
+        const hpX = unit.x * TILE_SIZE + (TILE_SIZE - hpWidth) / 2;
+        const hpY = unit.y * TILE_SIZE + TILE_SIZE - 10;
+        
+        this.ctx.fillStyle = '#333';
+        this.ctx.fillRect(hpX, hpY, hpWidth, hpHeight);
+        
+        this.ctx.fillStyle = unit.hp > 50 ? '#4CAF50' : '#ff9800';
+        this.ctx.fillRect(hpX, hpY, hpWidth * (unit.hp / unit.maxHp), hpHeight);
+        
+        // Unit status indicators
+        if (unit.moved || unit.attacked) {
+          this.ctx.font = '10px Arial';
+          this.ctx.fillStyle = '#ffd700';
+          let status = '';
+          if (unit.moved) status += '🏃';
+          if (unit.attacked) status += '⚔️';
+          this.ctx.fillText(status, x - 10, y - 25);
+        }
+      }
+      
+      renderMinimap() {
+        const scaleX = this.minimapCanvas.width / (MAP_WIDTH * TILE_SIZE);
+        const scaleY = this.minimapCanvas.height / (MAP_HEIGHT * TILE_SIZE);
+        
+        this.minimapCtx.fillStyle = '#1a1a2e';
+        this.minimapCtx.fillRect(0, 0, this.minimapCanvas.width, this.minimapCanvas.height);
+        
+        for (let y = 0; y < MAP_HEIGHT; y++) {
+          for (let x = 0; x < MAP_WIDTH; x++) {
+            const tile = this.map[y][x];
+            const mx = x * TILE_SIZE * scaleX;
+            const my = y * TILE_SIZE * scaleY;
+            const mw = TILE_SIZE * scaleX;
+            const mh = TILE_SIZE * scaleY;
+            
+            if (tile.terrain === TERRAIN.CITY) {
+              this.minimapCtx.fillStyle = tile.owner === 'player' ? '#4CAF50' : '#f44336';
+            } else {
+              this.minimapCtx.fillStyle = tile.terrain.color;
+            }
+            this.minimapCtx.fillRect(mx, my, mw, mh);
+          }
+        }
+        
+        this.units.forEach(unit => {
+          const mx = unit.x * TILE_SIZE * scaleX + (TILE_SIZE * scaleX) / 2;
+          const my = unit.y * TILE_SIZE * scaleY + (TILE_SIZE * scaleY) / 2;
+          
+          this.minimapCtx.fillStyle = unit.owner === 'player' ? '#fff' : '#ff0';
+          this.minimapCtx.beginPath();
+          this.minimapCtx.arc(mx, my, 3, 0, Math.PI * 2);
+          this.minimapCtx.fill();
+        });
+      }
+    }
+    
+    const game = new Game();
+  </script>
+</body>
+</html>

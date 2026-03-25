@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+/*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+/dist/
+/build/
+/*.apk
+/*.apk
+
+# Android
+/.gradle/
+/android/.gradle/
+/android/app/build/
+/android/app/.cxx/
+/android/.externalNativeBuild/
+/android/.cxx/
+/android/gradle/
+/android/.*/intermediates/
+/android/.*/build/
+/android/.*/generated/
+/android/.*/libs/
+/android/.*/tmp/
+/android/.*/.git/
+/android/.*/.idea/
+/android/.*/React/
+/android/.*/assets/
+/android/.*/res/
+/android/.*/java/
+/android/.*/jni/
+/android/.*/obj/
+/android/.*/llvm/
+/android/.*/.*/
+/android/.cxx/
+
+# Capacitor
+/android/app/src/main/assets/
+/android/app/src/main/res/
+/android/app/src/main/java/
+/android/app/src/main/AndroidManifest.xml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Reports
+/build/reports/
+/android/build/reports/
+
+# Misc
+.env
+.env.*

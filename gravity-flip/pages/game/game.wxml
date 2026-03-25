@@ -1,0 +1,83 @@
+<!--pages/game/game.wxml-->
+<view class="game-container">
+  <!-- 顶部信息 -->
+  <view class="header">
+    <view class="header-item">
+      <text class="label">关卡</text>
+      <text class="value">{{level}}</text>
+    </view>
+    <view class="header-item center">
+      <text class="label">星星</text>
+      <text class="value stars">{{stars}}/{{totalStars}}</text>
+    </view>
+    <view class="header-item">
+      <text class="label">时间</text>
+      <text class="value">{{time}}s</text>
+    </view>
+  </view>
+
+  <!-- 重力方向指示 -->
+  <view class="gravity-indicator">
+    <view class="gravity-arrow {{gravityDir}}">
+      <text class="arrow-icon">{{gravityIcon}}</text>
+    </view>
+  </view>
+
+  <!-- 游戏画布 -->
+  <canvas 
+    canvas-id="gameCanvas" 
+    class="game-canvas"
+    bindtap="onCanvasTap"
+    disable-scroll
+  ></canvas>
+
+  <!-- 控制按钮 -->
+  <view class="controls">
+    <button class="control-btn restart" bindtap="restartLevel">
+      <text>重新开始</text>
+    </button>
+    <button class="control-btn back" bindtap="goBack">
+      <text>返回</text>
+    </button>
+  </view>
+
+  <!-- 提示 -->
+  <view class="tip">
+    <text>点击屏幕任意位置翻转重力</text>
+  </view>
+
+  <!-- 游戏结束弹窗 -->
+  <view class="modal-overlay" wx:if="{{showModal}}">
+    <view class="modal-content {{modalType}}">
+      <text class="modal-icon">{{modalType === 'success' ? '🎉' : '💀'}}</text>
+      <text class="modal-title">{{modalTitle}}</text>
+      <view class="modal-stats">
+        <view class="stat-item">
+          <text class="stat-label">收集星星</text>
+          <text class="stat-value">{{stars}}/{{totalStars}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">用时</text>
+          <text class="stat-value">{{time}}s</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-label">得分</text>
+          <text class="stat-value">{{score}}</text>
+        </view>
+      </view>
+      <view class="stars-display" wx:if="{{modalType === 'success'}}">
+        <text class="star {{earnedStars >= 1 ? 'filled' : ''}}">★</text>
+        <text class="star {{earnedStars >= 2 ? 'filled' : ''}}">★</text>
+        <text class="star {{earnedStars >= 3 ? 'filled' : ''}}">★</text>
+      </view>
+      <view class="modal-buttons">
+        <button class="modal-btn primary" bindtap="modalAction" data-action="continue">
+          {{modalType === 'success' ? '下一关' : '再试一次'}}
+        </button>
+        <button class="modal-btn secondary" bindtap="modalAction" data-action="back">
+          返回关卡
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

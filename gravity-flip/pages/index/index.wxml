@@ -1,0 +1,69 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 标题 -->
+  <view class="title-section">
+    <view class="gravity-icon">
+      <text class="icon-arrow up">↑</text>
+      <text class="icon-arrow left">←</text>
+      <view class="ball-icon"></view>
+      <text class="icon-arrow right">→</text>
+      <text class="icon-arrow down">↓</text>
+    </view>
+    <text class="game-title">重力翻转</text>
+    <text class="game-subtitle">点击改变重力，挑战你的极限</text>
+  </view>
+
+  <!-- 关卡选择 -->
+  <view class="levels-section">
+    <text class="section-title">选择关卡</text>
+    <scroll-view class="level-scroll" scroll-y>
+      <view class="level-grid">
+        <view 
+          class="level-card {{item.unlocked ? '' : 'locked'}} {{item.completed ? 'completed' : ''}}"
+          wx:for="{{levels}}" 
+          wx:key="id"
+          bindtap="selectLevel"
+          data-level="{{item.id}}"
+          data-unlocked="{{item.unlocked}}"
+        >
+          <text class="level-number">{{item.id}}</text>
+          <text class="level-name">{{item.name}}</text>
+          <view class="level-stars">
+            <text class="star {{item.stars >= 1 ? 'filled' : ''}}">★</text>
+            <text class="star {{item.stars >= 2 ? 'filled' : ''}}">★</text>
+            <text class="star {{item.stars >= 3 ? 'filled' : ''}}">★</text>
+          </view>
+          <text class="level-status" wx:if="{{!item.unlocked}}">🔒</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 开始按钮 -->
+  <view class="button-section">
+    <button class="start-btn" bindtap="startGame">
+      <text>开始游戏</text>
+    </button>
+  </view>
+
+  <!-- 玩法说明 -->
+  <view class="how-to-play">
+    <text class="how-title">玩法说明</text>
+    <view class="how-item">
+      <text class="how-icon">👆</text>
+      <text class="how-text">点击屏幕翻转重力方向</text>
+    </view>
+    <view class="how-item">
+      <text class="how-icon">⭐</text>
+      <text class="how-text">收集星星获得高分</text>
+    </view>
+    <view class="how-item">
+      <text class="how-icon">⚡</text>
+      <text class="how-text">躲避尖刺和激光</text>
+    </view>
+    <view class="how-item">
+      <text class="how-icon">🚪</text>
+      <text class="how-text">到达出口过关</text>
+    </view>
+  </view>
+</view>

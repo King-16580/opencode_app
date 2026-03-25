@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <title>习惯打卡</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px 20px 80px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .header .date {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .streak-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin: -60px 20px 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+    
+    .streak-item {
+      flex: 1;
+    }
+    
+    .streak-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .streak-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    
+    /* Habits Section */
+    .habits-section {
+      flex: 1;
+      padding: 0 20px 100px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin: 25px 0 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Habit Card */
+    .habit-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.3s;
+    }
+    
+    .habit-card.completed {
+      background: linear-gradient(135deg, #f0fff4 0%, #e8f5e9 100%);
+    }
+    
+    .habit-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .habit-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .habit-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .habit-streak {
+      font-size: 13px;
+      color: #888;
+    }
+    
+    .habit-streak span {
+      color: #ff6b6b;
+      font-weight: 600;
+    }
+    
+    .habit-check {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #ddd;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+    
+    .habit-check.checked {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    .habit-check:active {
+      transform: scale(0.95);
+    }
+    
+    /* Progress Ring */
+    .progress-ring-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .progress-ring {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+    
+    .progress-ring svg {
+      transform: rotate(-90deg);
+    }
+    
+    .progress-ring-bg {
+      fill: none;
+      stroke: #e0e0e0;
+      stroke-width: 10;
+    }
+    
+    .progress-ring-fill {
+      fill: none;
+      stroke: url(#progressGradient);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    .progress-percent {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .progress-label {
+      font-size: 11px;
+      color: #888;
+    }
+    
+    /* Add Button */
+    .add-btn {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      font-size: 30px;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+    
+    .add-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .add-btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      padding: 12px 20px 25px;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+      z-index: 99;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #888;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .nav-item.active {
+      color: #667eea;
+      background: rgba(102,  126, 234, 0.1);
+    }
+    
+    .nav-item svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 24px 24px 0 0;
+      padding: 30px 25px 40px;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .icon-picker {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+    
+    .icon-option {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .icon-option:hover {
+      border-color: #667eea;
+    }
+    
+    .icon-option.selected {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .color-picker {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid white;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+    
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+    
+    .color-option.selected {
+      border-color: #333;
+      transform: scale(1.15);
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    .btn-cancel {
+      background: #f0f0f0;
+      color: #666;
+    }
+    
+    .btn-save {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    /* Stats Page */
+    .stats-page {
+      display: none;
+      padding: 20px;
+    }
+    
+    .stats-page.active {
+      display: block;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .stat-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .stat-badge {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    
+    .week-day {
+      text-align: center;
+    }
+    
+    .week-day-label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    
+    .week-day-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #e0e0e0;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .week-day-dot.completed {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .week-day-dot.today {
+      border: 2px solid #667eea;
+    }
+    
+    /* Calendar View */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 15px;
+    }
+    
+    .calendar-header {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      font-weight: 500;
+    }
+    
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border-radius: 10px;
+      background: #f5f5f5;
+    }
+    
+    .calendar-day.empty {
+      background: transparent;
+    }
+    
+    .calendar-day.completed {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .calendar-day.today {
+      border: 2px solid #667eea;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    
+    .empty-text {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    
+    /* Habit List Page */
+    .habits-page {
+      padding: 0 20px 100px;
+    }
+    
+    .habits-page.active {
+      display: block;
+    }
+    
+    /* Swipe to delete */
+    .habit-card-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .delete-btn {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      background: #ff4757;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      transform: translateX(100%);
+      transition: transform 0.3s;
+    }
+    
+    .habit-card-wrapper.show-delete .delete-btn {
+      transform: translateX(0);
+    }
+    
+    /* Motivational quote */
+    .quote-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px;
+      text-align: center;
+    }
+    
+    .quote-text {
+      font-size: 15px;
+      color: #555;
+      font-style: italic;
+      line-height: 1.6;
+    }
+    
+    /* Animations */
+    @keyframes bounce-in {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .bounce-in {
+      animation: bounce-in 0.4s ease;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <div class="header">
+      <h1>🌟 习惯打卡</h1>
+      <div class="date" id="currentDate"></div>
+    </div>
+    
+    <!-- Streak Card -->
+    <div class="streak-card">
+      <div class="streak-item">
+        <div class="streak-number" id="todayCount">0</div>
+        <div class="streak-label">今日完成</div>
+      </div>
+      <div class="streak-item">
+        <div class="streak-number" id="totalDays">0</div>
+        <div class="streak-label">坚持天数</div>
+      </div>
+      <div class="streak-item">
+        <div class="streak-number" id="totalCheckins">0</div>
+        <div class="streak-label">累计打卡</div>
+      </div>
+    </div>
+    
+    <!-- Tab Content -->
+    <div class="tab-content active" id="homeTab">
+      <!-- Progress Ring -->
+      <div class="progress-ring-container">
+        <div class="progress-ring">
+          <svg width="120" height="120">
+            <defs>
+              <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea"/>
+                <stop offset="100%" style="stop-color:#764ba2"/>
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="progress-ring-fill" id="progressRing" cx="60" cy="60" r="50" 
+                    stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+          </svg>
+          <div class="progress-ring-text">
+            <div class="progress-percent" id="progressPercent">0%</div>
+            <div class="progress-label">完成率</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section-title">📋 今日习惯</div>
+      <div class="habits-section" id="todayHabits"></div>
+    </div>
+    
+    <div class="tab-content" id="habitsTab">
+      <div class="habits-page active">
+        <div class="section-title">⚙️ 我的习惯</div>
+        <div id="allHabits"></div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="statsTab">
+      <div class="stats-page active">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-title">本周完成情况</div>
+            <div class="stat-badge" id="weekPercent">0%</div>
+          </div>
+          <div class="week-grid" id="weekGrid"></div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-title">本月打卡日历</div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+        
+        <div class="quote-card">
+          <div class="quote-text" id="motivationalQuote">
+            "坚持是最好的天赋。"
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add Button -->
+    <button class="add-btn" onclick="showAddModal()">+</button>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="nav-item active" data-tab="homeTab" onclick="switchTab('homeTab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>首页</span>
+      </div>
+      <div class="nav-item" data-tab="habitsTab" onclick="switchTab('habitsTab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        <span>习惯</span>
+      </div>
+      <div class="nav-item" data-tab="statsTab" onclick="switchTab('statsTab')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>统计</span>
+      </div>
+    </nav>
+    
+    <!-- Add Habit Modal -->
+    <div class="modal" id="addModal">
+      <div class="modal-content">
+        <div class="modal-title">添加新习惯</div>
+        
+        <div class="form-group">
+          <label class="form-label">习惯名称</label>
+          <input type="text" class="form-input" id="habitName" placeholder="例如：早起、跑步、读书">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">选择图标</label>
+          <div class="icon-picker" id="iconPicker"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">选择颜色</label>
+          <div class="color-picker" id="colorPicker"></div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-cancel" onclick="hideAddModal()">取消</button>
+          <button class="btn btn-save" onclick="saveHabit()">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Icons and Colors
+    const ICONS = ['🏃', '📚', '💧', '🧘', '💪', '🎯', '✍️', '🎨', '🎵', '🌅', '😴', '🍎', '💊', '🧹', '📱', '💰', '🎮', '🌿'];
+    const COLORS = ['#667eea', '#f093fb', '#f5576c', '#4facfe', '#43e97b', '#38f9d7', '#fa709a', '#fee140', '#a8edea', '#ff9a9e'];
+    
+    // Quotes
+    const QUOTES = [
+      "坚持是最好的天赋。",
+      "每天进步一点点，一年就是巨大的飞跃。",
+      "习惯决定命运，细节决定成败。",
+      "不要等待机会，要创造机会。",
+      "自律给我自由。",
+      "成功的秘诀在于坚持。",
+      "今天比昨天好，就是希望。",
+      "保持热爱，奔赴山海。"
+    ];
+    
+    // State
+    let habits = [];
+    let checkins = {};
+    let selectedIcon = ICONS[0];
+    let selectedColor = COLORS[0];
+    
+    // Initialize
+    function init() {
+      loadData();
+      updateDate();
+      renderIconPicker();
+      renderColorPicker();
+      renderHabits();
+      renderStats();
+      updateMotivationalQuote();
+    }
+    
+    function loadData() {
+      const savedHabits = localStorage.getItem('habits');
+      const savedCheckins = localStorage.getItem('checkins');
+      
+      if (savedHabits) {
+        habits = JSON.parse(savedHabits);
+      } else {
+        // Default habits
+        habits = [
+          { id: 1, name: '早起', icon: '🌅', color: '#4facfe' },
+          { id: 2, name: '喝水', icon: '💧', color: '#43e97b' },
+          { id: 3, name: '运动', icon: '🏃', color: '#667eea' }
+        ];
+        saveHabits();
+      }
+      
+      if (savedCheckins) {
+        checkins = JSON.parse(savedCheckins);
+      }
+    }
+    
+    function saveHabits() {
+      localStorage.setItem('habits', JSON.stringify(habits));
+    }
+    
+    function saveCheckins() {
+      localStorage.setItem('checkins', JSON.stringify(checkins));
+    }
+    
+    function getTodayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+    
+    function updateDate() {
+      const now = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+    }
+    
+    function renderIconPicker() {
+      const picker = document.getElementById('iconPicker');
+      picker.innerHTML = ICONS.map((icon, i) => `
+        <div class="icon-option ${i === 0 ? 'selected' : ''}" onclick="selectIcon('${icon}', this)">${icon}</div>
+      `).join('');
+    }
+    
+    function selectIcon(icon, el) {
+      document.querySelectorAll('.icon-option').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedIcon = icon;
+    }
+    
+    function renderColorPicker() {
+      const picker = document.getElementById('colorPicker');
+      picker.innerHTML = COLORS.map((color, i) => `
+        <div class="color-option ${i === 0 ? 'selected' : ''}" 
+             style="background: ${color}" 
+             onclick="selectColor('${color}', this)"></div>
+      `).join('');
+    }
+    
+    function selectColor(color, el) {
+      document.querySelectorAll('.color-option').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedColor = color;
+    }
+    
+    function showAddModal() {
+      document.getElementById('addModal').classList.add('active');
+      document.getElementById('habitName').value = '';
+      document.getElementById('habitName').focus();
+    }
+    
+    function hideAddModal() {
+      document.getElementById('addModal').classList.remove('active');
+    }
+    
+    function saveHabit() {
+      const name = document.getElementById('habitName').value.trim();
+      
+      if (!name) {
+        alert('请输入习惯名称');
+        return;
+      }
+      
+      const newHabit = {
+        id: Date.now(),
+        name,
+        icon: selectedIcon,
+        color: selectedColor
+      };
+      
+      habits.push(newHabit);
+      saveHabits();
+      
+      hideAddModal();
+      renderHabits();
+      renderStats();
+    }
+    
+    function toggleHabit(id) {
+      const today = getTodayKey();
+      
+      if (!checkins[today]) {
+        checkins[today] = [];
+      }
+      
+      const index = checkins[today].indexOf(id);
+      
+      if (index > -1) {
+        checkins[today].splice(index, 1);
+      } else {
+        checkins[today].push(id);
+      }
+      
+      saveCheckins();
+      renderHabits();
+      renderStats();
+      
+      // Animation
+      const btn = document.querySelector(`[data-habit-id="${id}"]`);
+      if (btn) {
+        btn.classList.add('bounce-in');
+        setTimeout(() => btn.classList.remove('bounce-in'), 400);
+      }
+    }
+    
+    function deleteHabit(id) {
+      if (confirm('确定要删除这个习惯吗？')) {
+        habits = habits.filter(h => h.id !== id);
+        saveHabits();
+        renderHabits();
+        renderStats();
+      }
+    }
+    
+    function renderHabits() {
+      const today = getTodayKey();
+      const todayCheckins = checkins[today] || [];
+      
+      // Calculate stats
+      let totalCheckins = 0;
+      Object.values(checkins).forEach(arr => totalCheckins += arr.length);
+      
+      // Count days with any checkin
+      const daysWithCheckins = Object.keys(checkins).length;
+      
+      document.getElementById('todayCount').textContent = todayCheckins.length;
+      document.getElementById('totalDays').textContent = daysWithCheckins;
+      document.getElementById('totalCheckins').textContent = totalCheckins;
+      
+      // Progress ring
+      const progress = habits.length > 0 ? (todayCheckins.length / habits.length) * 100 : 0;
+      const circumference = 2 * Math.PI * 50;
+      const offset = circumference - (progress / 100) * circumference;
+      document.getElementById('progressRing').style.strokeDashoffset = offset;
+      document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+      
+      // Today habits
+      const todayHabitsEl = document.getElementById('todayHabits');
+      if (habits.length === 0) {
+        todayHabitsEl.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🌱</div>
+            <div class="empty-text">还没有习惯，点击右下角添加</div>
+          </div>
+        `;
+      } else {
+        todayHabitsEl.innerHTML = habits.map(habit => {
+          const completed = todayCheckins.includes(habit.id);
+          const streak = calculateStreak(habit.id);
+          
+          return `
+            <div class="habit-card ${completed ? 'completed' : ''}">
+              <div class="habit-icon" style="background: ${habit.color}20; color: ${habit.color}">
+                ${habit.icon}
+              </div>
+              <div class="habit-info">
+                <div class="habit-name">${habit.name}</div>
+                <div class="habit-streak">连续 <span>${streak}</span> 天</div>
+              </div>
+              <div class="habit-check ${completed ? 'checked' : ''}" 
+                   data-habit-id="${habit.id}"
+                   onclick="toggleHabit(${habit.id})">
+                ${completed ? '✓' : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // All habits (for management)
+      const allHabitsEl = document.getElementById('allHabits');
+      allHabitsEl.innerHTML = habits.map(habit => {
+        const completed = todayCheckins.includes(habit.id);
+        const totalCheckinsForHabit = Object.values(checkins).flat().filter(id => id === habit.id).length;
+        
+        return `
+          <div class="habit-card">
+            <div class="habit-icon" style="background: ${habit.color}20; color: ${habit.color}">
+              ${habit.icon}
+            </div>
+            <div class="habit-info">
+              <div class="habit-name">${habit.name}</div>
+              <div class="habit-streak">累计打卡 <span>${totalCheckinsForHabit}</span> 次</div>
+            </div>
+            <button style="background: #ff4757; color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer;" onclick="deleteHabit(${habit.id})">删除</button>
+          </div>
+        `;
+      }).join('') || `
+        <div class="empty-state">
+          <div class="empty-icon">🌱</div>
+          <div class="empty-text">还没有习惯，点击右下角添加</div>
+        </div>
+      `;
+    }
+    
+    function calculateStreak(habitId) {
+      let streak = 0;
+      const now = new Date();
+      
+      for (let i = 0; i < 365; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        
+        if (checkins[key] && checkins[key].includes(habitId)) {
+          streak++;
+        } else if (i > 0) {
+          break;
+        }
+      }
+      
+      return streak;
+    }
+    
+    function renderStats() {
+      renderWeekStats();
+      renderCalendarStats();
+    }
+    
+    function renderWeekStats() {
+      const weekGrid = document.getElementById('weekGrid');
+      const days = ['日', '一', '二', '三', '四', '五', '六'];
+      const today = new Date();
+      const todayKey = getTodayKey();
+      let totalChecks = 0;
+      let totalPossible = 0;
+      
+      let html = '';
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const dayName = days[date.getDay()];
+        const isToday = key === todayKey;
+        const checks = checkins[key] || [];
+        
+        totalChecks += checks.length;
+        totalPossible += habits.length;
+        
+        html += `
+          <div class="week-day">
+            <div class="week-day-label">${dayName}</div>
+            <div class="week-day-dot ${checks.length > 0 ? 'completed' : ''} ${isToday ? 'today' : ''}">
+              ${checks.length > 0 ? '✓' : '·'}
+            </div>
+          </div>
+        `;
+      }
+      
+      weekGrid.innerHTML = html;
+      const weekPercent = totalPossible > 0 ? Math.round((totalChecks / totalPossible) * 100) : 0;
+      document.getElementById('weekPercent').textContent = weekPercent + '%';
+    }
+    
+    function renderCalendarStats() {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const todayKey = getTodayKey();
+      
+      let html = '<div class="calendar-header">日</div><div class="calendar-header">一</div><div class="calendar-header">二</div><div class="calendar-header">三</div><div class="calendar-header">四</div><div class="calendar-header">五</div><div class="calendar-header">六</div>';
+      
+      // Empty cells before first day
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        html += '<div class="calendar-day empty"></div>';
+      }
+      
+      // Days of month
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = key === todayKey;
+        const checks = checkins[key] || [];
+        
+        html += `<div class="calendar-day ${checks.length > 0 ? 'completed' : ''} ${isToday ? 'today' : ''}">${day}</div>`;
+      }
+      
+      calendarGrid.innerHTML = html;
+    }
+    
+    function updateMotivationalQuote() {
+      const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+      document.getElementById('motivationalQuote').textContent = `"${quote}"`;
+    }
+    
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.tab === tabId) {
+          item.classList.add('active');
+        }
+      });
+      
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+    }
+    
+    // Close modal on outside click
+    document.getElementById('addModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideAddModal();
+      }
+    });
+    
+    // Initialize app
+    init();
+  </script>
+</body>
+</html>

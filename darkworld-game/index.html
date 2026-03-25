@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a1a">
+  <title>灵魂地图 - 暗夜探秘</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    
+    body {
+      background: #0a0a1a;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .game-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+    
+    /* UI Overlay */
+    .ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .ui-overlay > * {
+      pointer-events: auto;
+    }
+    
+    /* Top Bar */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(10, 10, 26, 0.8), transparent);
+    }
+    
+    .game-title {
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 4px;
+    }
+    
+    .day-counter {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Progress Bar */
+    .progress-container {
+      position: absolute;
+      top: 70px;
+      left: 20px;
+      right: 20px;
+    }
+    
+    .progress-bar {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    
+    .progress-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 8px;
+      text-align: center;
+    }
+    
+    /* Object Counter */
+    .object-counter {
+      position: absolute;
+      top: 120px;
+      left: 20px;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .soul-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .soul-dot.collected {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: #667eea;
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    }
+    
+    /* Bottom UI */
+    .bottom-ui {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+      right: 20px;
+      text-align: center;
+    }
+    
+    .hint-text {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+    
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s ease;
+    }
+    
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: linear-gradient(180deg, #1a1a2e 0%, #0a0a1a 100%);
+      border-radius: 20px;
+      padding: 40px 30px;
+      max-width: 340px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.5s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+    
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .modal-title {
+      font-size: 22px;
+      font-weight: 300;
+      color: #fff;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+    }
+    
+    .modal-text {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.8;
+      margin-bottom: 25px;
+    }
+    
+    .modal-poem {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+      line-height: 2;
+      margin-bottom: 30px;
+      padding: 15px;
+      border-left: 2px solid rgba(102, 126, 234, 0.3);
+      text-align: left;
+    }
+    
+    .btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Start Screen */
+    .start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0a0a1a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      transition: opacity 1s ease;
+    }
+    
+    .start-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .start-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    
+    .start-title {
+      font-size: 32px;
+      font-weight: 200;
+      color: #fff;
+      letter-spacing: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .start-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 2px;
+      margin-bottom: 50px;
+    }
+    
+    .start-btn {
+      padding: 18px 60px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 30px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .start-btn:hover {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+      transform: scale(1.05);
+    }
+    
+    .start-btn:active {
+      transform: scale(0.95);
+    }
+    
+    /* Share Button */
+    .share-btn {
+      position: absolute;
+      bottom: 100px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .share-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      bottom: 180px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .tooltip.show {
+      opacity: 1;
+    }
+    
+    /* Sound Button */
+    .sound-btn {
+      position: absolute;
+      top: 20px;
+      right: 80px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="ui-overlay">
+      <div class="top-bar">
+        <div>
+          <div class="game-title">灵魂地图</div>
+          <div class="day-counter" id="dayCounter">第 1 天</div>
+        </div>
+        <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-label">探索度: <span id="progressPercent">0</span>%</div>
+      </div>
+      
+      <div class="object-counter" id="soulDots"></div>
+      
+      <div class="tooltip" id="tooltip">轻触屏幕，让灵魂之光绽放</div>
+      
+      <div class="bottom-ui">
+        <div class="hint-text" id="hintText">在黑暗中寻找隐藏的灵魂碎片</div>
+      </div>
+      
+      <button class="share-btn" onclick="shareResult()">📤</button>
+    </div>
+    
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+      <div class="start-icon">🔮</div>
+      <div class="start-title">灵魂地图</div>
+      <div class="start-subtitle">在暗夜中寻找光明</div>
+      <button class="start-btn" onclick="startGame()">开始探索</button>
+    </div>
+    
+    <!-- Soul Found Modal -->
+    <div class="modal" id="soulModal">
+      <div class="modal-content">
+        <div class="modal-icon" id="soulIcon">✨</div>
+        <div class="modal-title" id="soulTitle">灵魂碎片</div>
+        <div class="modal-text" id="soulText">你发现了一个隐藏的灵魂碎片</div>
+        <div class="modal-poem" id="soulPoem"></div>
+        <button class="btn btn-primary" onclick="closeSoulModal()">继续探索</button>
+      </div>
+    </div>
+    
+    <!-- Complete Modal -->
+    <div class="modal" id="completeModal">
+      <div class="modal-content">
+        <div class="modal-icon">🌟</div>
+        <div class="modal-title">探索完成</div>
+        <div class="modal-text" id="completeText">你收集了所有灵魂碎片</div>
+        <div class="modal-poem" id="completePoem"></div>
+        <button class="btn btn-primary" onclick="nextDay()">明天再来</button>
+        <button class="btn btn-secondary" onclick="shareResult()">分享今日探索</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Game Constants
+    const SOUL_COUNT = 5;
+    const WAVE_SPEED = 2;
+    const WAVE_LIFETIME = 60;
+    const PARTICLE_COUNT = 50;
+    
+    // Game State
+    let canvas, ctx;
+    let width, height;
+    let souls = [];
+    let collectedSouls = 0;
+    let waves = [];
+    let particles = [];
+    let revealedArea = 0;
+    let gameStarted = false;
+    let soundEnabled = true;
+    let day = 1;
+    let touchX = 0, touchY = 0;
+    let lastTouchTime = 0;
+    
+    // Daily poems/stories
+    const DAILY_CONTENT = [
+      {
+        icon: "🌙",
+        title: "月光碎片",
+        text: "在黑暗中，你发现了月光的碎片",
+        poem: "月光如水洒人间，\n碎片轻落在心间。\n每一个黑夜过后，\n都会有新的晨曦。"
+      },
+      {
+        icon: "🌟",
+        title: "星辰记忆",
+        text: "一颗流星划过，留下了温暖的记忆",
+        poem: "星星坠落成回忆，\n在夜空中写下思念。\n那些温暖的瞬间，\n永远珍藏在心间。"
+      },
+      {
+        icon: "🔮",
+        title: "水晶之泪",
+        text: "透明的泪滴中，映照着过去的故事",
+        poem: "水晶般的眼泪，\n折射出七彩光芒。\n每一滴都是故事，\n每一滴都是成长。"
+      },
+      {
+        icon: "🌿",
+        title: "夜之花",
+        text: "在黑暗中绽放的花朵，散发着温柔的香气",
+        poem: "黑暗中绽放的花，\n不需要阳光的眷顾。\n只要心中有希望，\n哪里都是花园。"
+      },
+      {
+        icon: "💫",
+        title: "灵魂之歌",
+        text: "你听到了来自灵魂深处的歌声",
+        poem: "灵魂唱着古老的歌，\n穿越时空来到此刻。\n每一个音符都是爱，\n每一个旋律都是家。"
+      }
+    ];
+    
+    // Initialize game
+    function init() {
+      canvas = document.getElementById('gameCanvas');
+      ctx = canvas.getContext('2d');
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      // Load saved day
+      const savedDay = localStorage.getItem('darkworld_day');
+      if (savedDay) {
+        day = parseInt(savedDay) || 1;
+      }
+      
+      document.getElementById('dayCounter').textContent = `第 ${day} 天`;
+      
+      setupEventListeners();
+      generateSouls();
+      renderSoulDots();
+      gameLoop();
+    }
+    
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth * 2;
+      height = canvas.height = window.innerHeight * 2;
+    }
+    
+    function setupEventListeners() {
+      // Touch events
+      canvas.addEventListener('touchstart', handleTouchStart);
+      canvas.addEventListener('touchmove', handleTouchMove);
+      canvas.addEventListener('touchend', handleTouchEnd);
+      
+      // Mouse events for desktop
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mouseup', handleMouseUp);
+    }
+    
+    function handleTouchStart(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchX = touch.clientX * 2;
+      touchY = touch.clientY * 2;
+      createWave(touchX, touchY);
+      checkSoulCollection(touchX, touchY);
+      hideTooltip();
+    }
+    
+    function handleTouchMove(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchX = touch.clientX * 2;
+      touchY = touch.clientY * 2;
+      
+      const now = Date.now();
+      if (now - lastTouchTime > 150) {
+        createWave(touchX, touchY);
+        lastTouchTime = now;
+      }
+    }
+    
+    function handleTouchEnd(e) {
+      e.preventDefault();
+    }
+    
+    function handleMouseDown(e) {
+      touchX = e.clientX * 2;
+      touchY = e.clientY * 2;
+      createWave(touchX, touchY);
+      checkSoulCollection(touchX, touchY);
+      hideTooltip();
+    }
+    
+    function handleMouseMove(e) {
+      if (e.buttons === 1) {
+        touchX = e.clientX * 2;
+        touchY = e.clientY * 2;
+        
+        const now = Date.now();
+        if (now - lastTouchTime > 150) {
+          createWave(touchX, touchY);
+          lastTouchTime = now;
+        }
+      }
+    }
+    
+    function handleMouseUp(e) {
+      // Nothing
+    }
+    
+    function generateSouls() {
+      souls = [];
+      collectedSouls = 0;
+      waves = [];
+      revealedArea = 0;
+      
+      // Seed based on day for consistent daily generation
+      const seed = day * 1000;
+      
+      for (let i = 0; i < SOUL_COUNT; i++) {
+        // Generate positions with good spacing
+        let x, y;
+        let attempts = 0;
+        
+        do {
+          x = 100 + (seed * (i + 1) * 17 + attempts * 37) % (width - 200);
+          y = 150 + (seed * (i + 1) * 23 + attempts * 41) % (height - 300);
+          attempts++;
+        } while (attempts < 50 && isTooCloseToOtherSouls(x, y, i));
+        
+        souls.push({
+          x,
+          y,
+          collected: false,
+          radius: 30,
+          glowRadius: 60,
+          pulsePhase: Math.random() * Math.PI * 2,
+          content: DAILY_CONTENT[i % DAILY_CONTENT.length]
+        });
+      }
+      
+      updateProgress();
+    }
+    
+    function isTooCloseToOtherSouls(x, y, index) {
+      for (let i = 0; i < index; i++) {
+        const dx = x - souls[i].x;
+        const dy = y - souls[i].y;
+        if (Math.sqrt(dx * dx + dy * dy) < 200) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    function createWave(x, y) {
+      waves.push({
+        x,
+        y,
+        radius: 0,
+        maxRadius: Math.max(width, height),
+        alpha: 1,
+        lifetime: WAVE_LIFETIME
+      });
+      
+      // Create particles
+      for (let i = 0; i < 5; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 2;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: 2 + Math.random() * 3,
+          alpha: 1,
+          lifetime: 30 + Math.random() * 30
+        });
+      }
+      
+      playWaveSound();
+    }
+    
+    function checkSoulCollection(x, y) {
+      souls.forEach(soul => {
+        if (soul.collected) return;
+        
+        const dx = x - soul.x;
+        const dy = y - soul.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < soul.glowRadius) {
+          collectSoul(soul);
+        }
+      });
+    }
+    
+    function collectSoul(soul) {
+      soul.collected = true;
+      collectedSouls++;
+      
+      // Play collection sound
+      playCollectSound();
+      
+      // Show soul modal
+      showSoulModal(soul.content);
+      
+      // Update UI
+      renderSoulDots();
+      updateProgress();
+      
+      // Check if all collected
+      if (collectedSouls >= SOUL_COUNT) {
+        setTimeout(() => {
+          showCompleteModal();
+        }, 1500);
+      }
+    }
+    
+    function showSoulModal(content) {
+      document.getElementById('soulIcon').textContent = content.icon;
+      document.getElementById('soulTitle').textContent = content.title;
+      document.getElementById('soulText').textContent = content.text;
+      document.getElementById('soulPoem').textContent = content.poem;
+      document.getElementById('soulModal').classList.add('active');
+    }
+    
+    function closeSoulModal() {
+      document.getElementById('soulModal').classList.remove('active');
+    }
+    
+    function showCompleteModal() {
+      const totalPoems = DAILY_CONTENT.map(c => c.poem).join('\n\n');
+      document.getElementById('completePoem').textContent = totalPoems;
+      document.getElementById('completeModal').classList.add('active');
+      
+      // Save completion
+      localStorage.setItem(`darkworld_completed_${day}`, 'true');
+    }
+    
+    function nextDay() {
+      day++;
+      localStorage.setItem('darkworld_day', day);
+      document.getElementById('dayCounter').textContent = `第 ${day} 天`;
+      document.getElementById('completeModal').classList.remove('active');
+      
+      generateSouls();
+      renderSoulDots();
+      showTooltip('新的一天，新的探索开始');
+    }
+    
+    function renderSoulDots() {
+      const container = document.getElementById('soulDots');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < SOUL_COUNT; i++) {
+        const dot = document.createElement('div');
+        dot.className = `soul-dot ${i < collectedSouls ? 'collected' : ''}`;
+        container.appendChild(dot);
+      }
+    }
+    
+    function updateProgress() {
+      const progress = Math.min(100, Math.round((collectedSouls / SOUL_COUNT) * 100));
+      document.getElementById('progressFill').style.width = `${progress}%`;
+      document.getElementById('progressPercent').textContent = progress;
+      
+      // Update hint text
+      if (collectedSouls === 0) {
+        document.getElementById('hintText').textContent = '在黑暗中寻找隐藏的灵魂碎片';
+      } else if (collectedSouls < SOUL_COUNT) {
+        document.getElementById('hintText').textContent = `已找到 ${collectedSouls} 个碎片，继续探索...`;
+      } else {
+        document.getElementById('hintText').textContent = '恭喜！今天的探索已完成';
+      }
+    }
+    
+    function showTooltip(text) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = text;
+      tooltip.classList.add('show');
+      setTimeout(() => tooltip.classList.remove('show'), 3000);
+    }
+    
+    function hideTooltip() {
+      document.getElementById('tooltip').classList.remove('show');
+    }
+    
+    function startGame() {
+      gameStarted = true;
+      document.getElementById('startScreen').classList.add('hidden');
+      
+      setTimeout(() => {
+        document.getElementById('startScreen').style.display = 'none';
+        showTooltip('轻触屏幕，让灵魂之光绽放');
+      }, 1000);
+    }
+    
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+    }
+    
+    function playWaveSound() {
+      if (!soundEnabled) return;
+      // Simple oscillator sound
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.frequency.value = 200 + Math.random() * 200;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {}
+    }
+    
+    function playCollectSound() {
+      if (!soundEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.5);
+      } catch (e) {}
+    }
+    
+    function shareResult() {
+      const text = `🌟 灵魂地图 - 第${day}天探索\n\n✨ 今日收集: ${collectedSouls}/${SOUL_COUNT} 个灵魂碎片\n\n🔮 在黑暗中寻找光明，每一天都是新的旅程\n\n📍 来自灵魂地图`;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: '灵魂地图 - 暗夜探秘',
+          text: text
+        }).catch(() => {
+          // Fallback to clipboard
+          copyToClipboard(text);
+        });
+      } else {
+        copyToClipboard(text);
+      }
+    }
+    
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showTooltip('已复制到剪贴板');
+      }).catch(() => {
+        showTooltip('分享功能不可用');
+      });
+    }
+    
+    // Game Loop
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    function update() {
+      // Update waves
+      waves = waves.filter(wave => {
+        wave.radius += WAVE_SPEED;
+        wave.lifetime--;
+        wave.alpha = Math.max(0, wave.lifetime / WAVE_LIFETIME);
+        return wave.lifetime > 0;
+      });
+      
+      // Update particles
+      particles = particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.lifetime--;
+        p.alpha = Math.max(0, p.lifetime / 60);
+        return p.lifetime > 0;
+      });
+      
+      // Update revealed area
+      revealedArea = Math.min(100, (collectedSouls / SOUL_COUNT) * 100);
+      
+      // Check wave-soul interactions
+      waves.forEach(wave => {
+        souls.forEach(soul => {
+          if (soul.collected) return;
+          
+          const dx = wave.x - soul.x;
+          const dy = wave.y - soul.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // If wave passes through soul, show glow
+          if (Math.abs(wave.radius - dist) < 50) {
+            soul.pulsePhase += 0.1;
+          }
+        });
+      });
+    }
+    
+    function render() {
+      // Clear canvas
+      ctx.fillStyle = '#0a0a1a';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Draw background particles (stars)
+      drawStars();
+      
+      // Draw waves
+      drawWaves();
+      
+      // Draw particles
+      drawParticles();
+      
+      // Draw souls
+      drawSouls();
+      
+      // Draw vignette
+      drawVignette();
+    }
+    
+    function drawStars() {
+      const time = Date.now() * 0.001;
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      
+      // Fixed stars based on day
+      const seed = day * 100;
+      for (let i = 0; i < 100; i++) {
+        const x = (seed * (i + 1) * 17) % width;
+        const y = (seed * (i + 1) * 23) % height;
+        const size = 1 + (i % 3);
+        
+        const twinkle = Math.sin(time * 2 + i) * 0.5 + 0.5;
+        ctx.globalAlpha = 0.2 + twinkle * 0.3;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.globalAlpha = 1;
+    }
+    
+    function drawWaves() {
+      waves.forEach(wave => {
+        const gradient = ctx.createRadialGradient(
+          wave.x, wave.y, 0,
+          wave.x, wave.y, wave.radius
+        );
+        
+        gradient.addColorStop(0, `rgba(102, 126, 234, 0)`);
+        gradient.addColorStop(0.7, `rgba(102, 126, 234, ${wave.alpha * 0.15})`);
+        gradient.addColorStop(0.85, `rgba(118, 75, 162, ${wave.alpha * 0.3})`);
+        gradient.addColorStop(1, `rgba(118, 75, 162, 0)`);
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Wave ring
+        ctx.strokeStyle = `rgba(102, 126, 234, ${wave.alpha * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(wave.x, wave.y, wave.radius, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+    }
+    
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.fillStyle = `rgba(102, 126, 234, ${p.alpha * 0.8})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    function drawSouls() {
+      const time = Date.now() * 0.001;
+      
+      souls.forEach(soul => {
+        if (soul.collected) return;
+        
+        // Soul glow (appears when wave passes nearby)
+        const pulse = Math.sin(time * 3 + soul.pulsePhase) * 0.5 + 0.5;
+        
+        // Outer glow
+        const glowGradient = ctx.createRadialGradient(
+          soul.x, soul.y, 0,
+          soul.x, soul.y, soul.glowRadius
+        );
+        
+        glowGradient.addColorStop(0, `rgba(118, 75, 162, ${pulse * 0.4})`);
+        glowGradient.addColorStop(0.5, `rgba(102, 126, 234, ${pulse * 0.2})`);
+        glowGradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+        
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(soul.x, soul.y, soul.glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Core
+        const coreGradient = ctx.createRadialGradient(
+          soul.x, soul.y, 0,
+          soul.x, soul.y, soul.radius
+        );
+        
+        coreGradient.addColorStop(0, `rgba(255, 255, 255, ${0.8 + pulse * 0.2})`);
+        coreGradient.addColorStop(0.5, `rgba(118, 75, 162, ${0.6 + pulse * 0.2})`);
+        coreGradient.addColorStop(1, `rgba(102, 126, 234, ${0.3 + pulse * 0.2})`);
+        
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.arc(soul.x, soul.y, soul.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Inner spark
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.8 + pulse * 0.2})`;
+        ctx.beginPath();
+        ctx.arc(soul.x, soul.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      // Draw collected souls as small stars
+      souls.forEach(soul => {
+        if (!soul.collected) return;
+        
+        const pulse = Math.sin(time * 2) * 0.3 + 0.7;
+        
+        ctx.fillStyle = `rgba(102, 126, 234, ${pulse})`;
+        ctx.beginPath();
+        ctx.arc(soul.x, soul.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    function drawVignette() {
+      // Create vignette effect
+      const gradient = ctx.createRadialGradient(
+        width / 2, height / 2, Math.min(width, height) * 0.3,
+        width / 2, height / 2, Math.max(width, height) * 0.8
+      );
+      
+      gradient.addColorStop(0, 'rgba(10, 10, 26, 0)');
+      gradient.addColorStop(1, 'rgba(10, 10, 26, 0.8)');
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+    }
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

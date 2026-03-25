@@ -1,0 +1,234 @@
+/* pages/game/game.wxss */
+.game-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%);
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 顶部信息 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16rpx 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.header-item {
+  text-align: center;
+}
+
+.header-item.center {
+  flex: 1;
+}
+
+.label {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.value {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+.value.stars {
+  color: #ffd700;
+}
+
+/* 重力指示器 */
+.gravity-indicator {
+  margin-bottom: 20rpx;
+}
+
+.gravity-arrow {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #00d4ff;
+  transition: transform 0.3s;
+}
+
+.gravity-arrow.down { transform: rotate(0deg); }
+.gravity-arrow.up { transform: rotate(180deg); }
+.gravity-arrow.left { transform: rotate(90deg); }
+.gravity-arrow.right { transform: rotate(-90deg); }
+
+.arrow-icon {
+  font-size: 40rpx;
+  color: #00d4ff;
+}
+
+/* 游戏画布 */
+.game-canvas {
+  width: 680rpx;
+  height: 680rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20rpx;
+  border: 3rpx solid rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 40rpx rgba(0, 212, 255, 0.3);
+  margin-bottom: 30rpx;
+}
+
+/* 控制按钮 */
+.controls {
+  display: flex;
+  gap: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.control-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+  border-radius: 50rpx;
+  padding: 20rpx 50rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.control-btn::after {
+  border: none;
+}
+
+.control-btn.restart {
+  background: linear-gradient(135deg, #00d4ff, #0066ff);
+  border-color: transparent;
+}
+
+/* 提示 */
+.tip {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16rpx 30rpx;
+  border-radius: 30rpx;
+}
+
+.tip text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 弹窗 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(180deg, #1a1a3e 0%, #0f0f23 100%);
+  border-radius: 24rpx;
+  padding: 50rpx 40rpx;
+  width: 80%;
+  max-width: 600rpx;
+  text-align: center;
+  border: 2rpx solid rgba(0, 212, 255, 0.3);
+}
+
+.modal-content.success {
+  border-color: #00d4ff;
+}
+
+.modal-content.fail {
+  border-color: #ff6b6b;
+}
+
+.modal-icon {
+  display: block;
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.modal-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 30rpx;
+}
+
+.modal-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 30rpx;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.stat-value {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+.stars-display {
+  margin-bottom: 30rpx;
+}
+
+.stars-display .star {
+  font-size: 60rpx;
+  color: rgba(255, 255, 255, 0.2);
+  margin: 0 10rpx;
+}
+
+.stars-display .star.filled {
+  color: #ffd700;
+  text-shadow: 0 0 20rpx #ffd700;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.modal-btn {
+  width: 100%;
+  font-size: 32rpx;
+  font-weight: bold;
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  border: none;
+}
+
+.modal-btn::after {
+  border: none;
+}
+
+.modal-btn.primary {
+  background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+  color: #fff;
+}
+
+.modal-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}

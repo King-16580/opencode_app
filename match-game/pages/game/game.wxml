@@ -1,0 +1,78 @@
+<!--pages/game/game.wxml-->
+<view class="game-container">
+  <!-- 顶部信息栏 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="level-badge">第{{level}}关</text>
+    </view>
+    <view class="header-center">
+      <text class="score-label">分数</text>
+      <text class="score-value">{{score}}</text>
+    </view>
+    <view class="header-right">
+      <text class="target-label">目标</text>
+      <text class="target-value">{{targetScore}}</text>
+    </view>
+  </view>
+
+  <!-- 进度条 -->
+  <view class="progress-bar">
+    <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+  </view>
+
+  <!-- 连击提示 -->
+  <view class="combo-display" wx:if="{{combo > 1}}">
+    <text class="combo-text">{{combo}}连击!</text>
+    <text class="combo-bonus">+{{comboBonus}}</text>
+  </view>
+
+  <!-- 游戏棋盘 -->
+  <view class="game-board">
+    <view 
+      class="board-row" 
+      wx:for="{{board}}" 
+      wx:for-index="rowIdx"
+      wx:key="rowIdx"
+    >
+      <view 
+        class="tile {{item.selected ? 'selected' : ''}} {{item.eliminating ? 'eliminating' : ''}} {{item.falling ? 'falling' : ''}} color-{{item.color}}"
+        wx:for="{{item}}" 
+        wx:for-index="colIdx"
+        wx:key="colIdx"
+        bindtap="onTileTap"
+        data-row="{{rowIdx}}"
+        data-col="{{colIdx}}"
+        data-color="{{item.color}}"
+      >
+        <text class="tile-icon">{{item.icon}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 游戏控制按钮 -->
+  <view class="controls">
+    <button class="control-btn restart" bindtap="restartGame">
+      <text>重新开始</text>
+    </button>
+    <button class="control-btn back" bindtap="goBack">
+      <text>返回</text>
+    </button>
+  </view>
+
+  <!-- 游戏结束弹窗 -->
+  <view class="modal-overlay" wx:if="{{showModal}}">
+    <view class="modal-content {{modalType}}">
+      <text class="modal-title">{{modalTitle}}</text>
+      <text class="modal-score">最终分数: {{score}}</text>
+      <text class="modal-message">{{modalMessage}}</text>
+      <view class="modal-buttons">
+        <button class="modal-btn primary" bindtap="modalAction" data-action="continue">
+          {{modalType === 'success' ? '下一关' : '再试一次'}}
+        </button>
+        <button class="modal-btn secondary" bindtap="modalAction" data-action="back">
+          返回主页
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

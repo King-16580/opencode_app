@@ -1,0 +1,206 @@
+/* pages/index/index.wxss */
+.container {
+  padding: 30rpx;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%);
+}
+
+/* 标题区域 */
+.title-section {
+  text-align: center;
+  margin-bottom: 50rpx;
+  padding-top: 40rpx;
+}
+
+.gravity-icon {
+  position: relative;
+  width: 200rpx;
+  height: 200rpx;
+  margin: 0 auto 30rpx;
+}
+
+.icon-arrow {
+  position: absolute;
+  font-size: 40rpx;
+  color: #00d4ff;
+  opacity: 0.6;
+}
+
+.icon-arrow.up { top: 0; left: 50%; transform: translateX(-50%); }
+.icon-arrow.down { bottom: 0; left: 50%; transform: translateX(-50%); }
+.icon-arrow.left { left: 0; top: 50%; transform: translateY(-50%); }
+.icon-arrow.right { right: 0; top: 50%; transform: translateY(-50%); }
+
+.ball-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80rpx;
+  height: 80rpx;
+  background: radial-gradient(circle at 30% 30%, #00d4ff, #0066ff);
+  border-radius: 50%;
+  box-shadow: 0 0 40rpx #00d4ff;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 40rpx #00d4ff; }
+  50% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 60rpx #00d4ff; }
+}
+
+.game-title {
+  display: block;
+  font-size: 72rpx;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 30rpx #00d4ff;
+  margin-bottom: 16rpx;
+}
+
+.game-subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 关卡区域 */
+.levels-section {
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.level-scroll {
+  height: 400rpx;
+}
+
+.level-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  justify-content: center;
+}
+
+.level-card {
+  width: 180rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  text-align: center;
+  border: 2rpx solid rgba(0, 212, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.level-card:active {
+  transform: scale(0.95);
+}
+
+.level-card.locked {
+  opacity: 0.5;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.level-card.completed {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: #00d4ff;
+}
+
+.level-number {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #00d4ff;
+}
+
+.level-name {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 8rpx 0;
+}
+
+.level-stars {
+  display: flex;
+  justify-content: center;
+  gap: 4rpx;
+}
+
+.star {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.star.filled {
+  color: #ffd700;
+}
+
+.level-status {
+  display: block;
+  font-size: 36rpx;
+  margin-top: 8rpx;
+}
+
+/* 按钮 */
+.button-section {
+  margin-bottom: 40rpx;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, #00d4ff 0%, #0066ff 100%);
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+  border-radius: 50rpx;
+  padding: 30rpx 100rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 212, 255, 0.4);
+  border: none;
+}
+
+.start-btn::after {
+  border: none;
+}
+
+/* 玩法说明 */
+.how-to-play {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  width: 100%;
+}
+
+.how-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.how-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.how-item:last-child {
+  margin-bottom: 0;
+}
+
+.how-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.how-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
