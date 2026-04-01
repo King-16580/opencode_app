@@ -1,3 +1,5 @@
+# This script organizes photos and videos in a specified directory into subdirectories based on their date taken.
+
 import os
 import shutil
 from PIL import Image
